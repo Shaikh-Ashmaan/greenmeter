@@ -5,6 +5,9 @@
 - Comparative analysis (baseline vs optimized emissions)
 - Responsive and user-friendly interface
 
+⚙️ Functionality:
+The application processes user inputs to calculate emissions using predefined environmental factors, dynamically updating visualizations through JavaScript and Chart.js.
+
 🛠️ Technologies Used:
 - **HTML5** – Structured the application and defined core content
 - **Tailwind CSS (CDN)** – Designed a responsive, dark-themed user interface with modern layouts
