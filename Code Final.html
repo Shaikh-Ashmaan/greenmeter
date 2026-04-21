@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Green Meter App</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js CDN for Charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <!-- Chart.js DataLabels Plugin CDN (NEW) -->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+    <!-- Inter Font -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0d1217; /* Dark background */
+        }
+        /* Custom scrollbar styling for the dark theme */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #1f2937; }
+        ::-webkit-scrollbar-thumb { background: #10b981; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #059669; }
+        
+        /* Ensure canvas is responsive */
+        .chart-container {
+            position: relative;
+            height: 100%;
+            min-height: 250px;
+        }
+        
+        /* Input and Text Colors */
+        .input-text { color: #d1d5db; }
+        .input-label { color: #6b7280; }
+        .input-field {
+            background-color: #1f2937;
+            color: #10b981;
+            border: 1px solid #374151;
+        }
+    </style>
+</head>
+<body class="min-h-screen p-0 m-0">
+
+    <div id="app" class="max-w-7xl mx-auto p-4 md:p-6">
+        <!-- Header -->
+        <header class="flex justify-between items-center mb-6 p-4 rounded-lg bg-gray-800 shadow-xl">
+            <h1 class="text-3xl font-extrabold text-[#10b981]">Green Meter App</h1>
+            <div class="space-x-4 flex">
+                <button id="loadSampleData" class="py-2 px-4 bg-gray-600 text-white rounded-lg hover:bg-gray-500 transition shadow-md">Load Sample Data</button>
+                <button id="resetApp" class="py-2 px-4 bg-red-600 text-white rounded-lg hover:bg-red-500 transition shadow-md">Reset</button>
+                <button id="calculate" class="py-2 px-4 bg-[#10b981] text-gray-900 font-bold rounded-lg hover:bg-[#059669] transition shadow-md">Calculate</button>
+            </div>
+        </header>
+
+        <!-- Main Content Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+            <!-- Left Panel: Inputs & Adjustments -->
+            <div class="lg:col-span-1 bg-gray-800 p-6 rounded-xl shadow-xl space-y-6 overflow-y-auto max-h-[80vh]">
+                
+                <h2 class="text-xl font-semibold text-white border-b border-gray-700 pb-2">INPUTS - ACTIVITY DATA</h2>
+                <div id="input-fields" class="space-y-4">
+                    <!-- Inputs will be dynamically added here -->
+                </div>
+                
+                <h2 class="text-xl font-semibold text-white border-b border-gray-700 pb-2 pt-4">ADJUSTMENTS - SLIDERS</h2>
+                <div id="slider-fields" class="space-y-6">
+                    <!-- Sliders will be dynamically added here -->
+                </div>
+            </div>
+
+            <!-- Center Panel: Pie Chart -->
+            <div class="lg:col-span-1 bg-gray-800 p-6 rounded-xl shadow-xl flex flex-col">
+                <h2 class="text-xl font-semibold text-white text-center mb-4">Emission Share by Category (Pie — Optimized)</h2>
+                <div class="chart-container flex-grow">
+                    <canvas id="pieChart"></canvas>
+                </div>
+                <!-- UPDATED ASSUMPTIONS BLOCK -->
+                <div class="mt-4 p-3 bg-gray-900 rounded-lg text-sm text-gray-400">
+                    <p class="font-bold text-white mb-1">Assumptions</p>
+                    <p>
+                        Factors: Cars 0.18 kg/km · Trucks 0.90 kg/km · Buses 1.10 kg/km · Forklifts 4.0 kg/h · 
+                        Planes 9000 kg/h · Lighting 0.42 kg/kWh · Cooling 0.42 kg/kWh · Computing 0.42 kg/kWh · 
+                        Heating 0.20 kg/kWh-th. EV cars emit 70% less than gasoline cars. Plane load factor scales aircraft emissions linearly.
+                    </p>
+                </div>
+                <!-- END UPDATED ASSUMPTIONS BLOCK -->
+            </div>
+
+            <!-- Right Panel: Bar Chart -->
+            <div class="lg:col-span-1 bg-gray-800 p-6 rounded-xl shadow-xl flex flex-col">
+                <h2 class="text-xl font-semibold text-white text-center mb-4">Total Emissions (tons CO2e) — Baseline vs Optimized</h2>
+                <div class="chart-container flex-grow">
+                    <canvas id="barChart"></canvas>
+                </div>
+                <div class="mt-auto pt-4 flex justify-between space-x-4">
+                    <div class="p-3 w-1/2 bg-gray-900 rounded-lg text-center">
+                        <p class="text-sm input-label">Baseline solid tons CO2e</p>
+                        <p id="baselineTotal" class="text-3xl font-bold text-yellow-400 mt-1">0.0</p>
+                    </div>
+                    <div class="p-3 w-1/2 bg-gray-900 rounded-lg text-center">
+                        <p class="text-sm input-label">Optimized total tons CO2e</p>
+                        <p id="optimizedTotal" class="text-3xl font-bold text-[#10b981] mt-1">0.0</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- FIREBASE SETUP (Mandatory Inclusion) ---
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        console.log(`App ID: ${appId}. Firebase setup complete.`);
+
+        // --- CORE DATA AND FACTORS (Updated based on the new image) ---
+        // Factors are in kg/unit except for Planes (kg/hour) and Subcontractors (tons/year - enter directly)
+        const EMISSION_FACTORS = {
+            Cars: { factor: 0.18, unit: 'km', inputVal: 250000, label: 'Cars - distance (km/year)' },
+            Trucks: { factor: 0.90, unit: 'km', inputVal: 150000, label: 'Trucks - distance (km/year)' },
+            Buses: { factor: 1.10, unit: 'km', inputVal: 80000, label: 'Buses - distance (km/year)' },
+            Forklifts: { factor: 4.0, unit: 'hour', inputVal: 2000, label: 'Forklifts - Operating time (hours/year)' },
+            Planes: { factor: 9000, unit: 'hour', inputVal: 480, label: 'Cargo Planes - flight time (hours/year)' },
+            Lighting: { factor: 0.42, unit: 'kWh', inputVal: 120000, label: 'Office Lighting - Electricity used (kWh/year)' },
+            Heating: { factor: 0.20, unit: 'kWh-th', inputVal: 360000, label: 'Heating - Thermal energy used (kWh-th/year)' },
+            Cooling: { factor: 0.42, unit: 'kWh', inputVal: 300000, label: 'Cooling (A/C) - Electricity used (kWh/year)' },
+            Computing: { factor: 0.42, unit: 'kWh', inputVal: 96000, label: 'Computing (IT) - Electricity used (kWh/year)' },
+            // Subcontractors input is already in tons CO2e, so factor is implicitly 1 (ton/ton)
+            Subcontractors: { factor: 1.0, unit: 'ton', inputVal: 45, label: 'Subcontractors - Estimated emissions (tons/year)' }, 
+        };
+
+        const SLIDER_CONFIGS = {
+            S_EVCars: { min: 0, max: 100, step: 1, initial: 30, label: 'EV Share for Cars (%)', hint: 'EV Share (%) - reduction factor is 0.7.' },
+            S_KMReduction: { min: 0, max: 100, step: 1, initial: 10, label: 'KM Reduction (%)', hint: 'Reduction on remaining non-EV distance.' },
+            S_LoadFactor: { min: 0, max: 100, step: 1, initial: 100, label: 'Cargo Planes - Load Factor (%)', hint: 'Factor on Planes emission (LoadFactor/100).' },
+            S_OfficeCut: { min: 0, max: 100, step: 1, initial: 15, label: 'Office Efficiency Cut (%)', hint: 'Applied to Lighting, Cooling, and Computing emissions.' },
+        };
+
+        // Chart Instances
+        let barChart;
+        let pieChart;
+        const CHART_COLORS = [
+            '#facc15', '#ef4444', '#3b82f6', '#ec4899', '#f97316', 
+            '#a855f7', '#6366f1', '#14b8a6', '#f43f5e', '#10b981'
+        ];
+
+        // --- CHART INITIALIZATION ---
+
+        function initCharts() {
+            // Bar Chart (Baseline vs Optimized)
+            const barCtx = document.getElementById('barChart').getContext('2d');
+            barChart = new Chart(barCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Baseline', 'Optimized'],
+                    datasets: [{
+                        label: 'Total Emissions (tons CO2e)',
+                        data: [0, 0],
+                        backgroundColor: ['#facc15', '#10b981'],
+                        borderRadius: 8,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: '#374151' },
+                            ticks: { color: '#d1d5db' },
+                            title: { display: true, text: 'Emissions (tons CO2e)', color: '#9ca3af' }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#d1d5db' }
+                        }
+                    }
+                }
+            });
+
+            // Pie Chart (Optimized Share)
+            const pieCtx = document.getElementById('pieChart').getContext('2d');
+            pieChart = new Chart(pieCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(EMISSION_FACTORS),
+                    datasets: [{
+                        label: 'Optimized Emissions Share',
+                        data: Object.keys(EMISSION_FACTORS).map(() => 0),
+                        backgroundColor: CHART_COLORS,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: '#d1d5db',
+                                usePointStyle: true,
+                                boxHeight: 6
+                            }
+                        },
+                        // DATALABELS CONFIGURATION ADDED HERE
+                        datalabels: { 
+                            color: '#fff',
+                            formatter: (value, context) => {
+                                // Calculate total sum of all data points
+                                const total = context.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                                if (total === 0) return null; // Avoid division by zero
+                                
+                                // Calculate percentage and format to one decimal place
+                                const percentage = (value / total * 100).toFixed(1);
+                                
+                                // Only show label if percentage is greater than 0
+                                return percentage > 0 ? percentage + '%' : null;
+                            },
+                            font: {
+                                weight: 'bold',
+                                size: 14,
+                            },
+                            // Position labels inside the slices
+                            anchor: 'center', 
+                            align: 'center',
+                        }
+                        // END DATALABELS CONFIGURATION
+                    }
+                }
+            });
+        }
+
+        // --- UI GENERATION ---
+
+        function createInputFields() {
+            const container = document.getElementById('input-fields');
+            container.innerHTML = '';
+            
+            Object.keys(EMISSION_FACTORS).forEach(key => {
+                const config = EMISSION_FACTORS[key];
+                // Cleaned up factor display, removing LaTeX commands
+                const factorDisplay = key === 'Subcontractors' 
+                    ? `Enter directly (tons CO2e)` 
+                    : `Factor: ${config.factor} kg CO2e / ${config.unit}`;
+                
+                container.innerHTML += `
+                    <div class="space-y-1">
+                        <label for="I_${key}" class="input-label flex justify-between text-sm">
+                            <span>${config.label}</span>
+                            <span class="text-xs text-gray-500">${factorDisplay}</span>
+                        </label>
+                        <input type="number" id="I_${key}" value="${config.inputVal}" 
+                               class="input-field w-full p-2 rounded-lg text-sm focus:ring-[#10b981] focus:border-[#10b981]"
+                               min="0">
+                    </div>
+                `;
+            });
+        }
+
+        function createSliderFields() {
+            const container = document.getElementById('slider-fields');
+            container.innerHTML = '';
+            
+            Object.keys(SLIDER_CONFIGS).forEach(key => {
+                const config = SLIDER_CONFIGS[key];
+                
+                container.innerHTML += `
+                    <div class="space-y-2">
+                        <label for="${key}" class="text-sm font-medium text-white">${config.label}: <span id="${key}_val" class="text-[#10b981]">${config.initial}%</span></label>
+                        <input type="range" id="${key}" min="${config.min}" max="${config.max}" step="${config.step}" value="${config.initial}"
+                               class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer range-lg"
+                               oninput="document.getElementById('${key}_val').textContent = this.value + '%' ">
+                        <p class="text-xs text-gray-400 italic">${config.hint}</p>
+                    </div>
+                `;
+            });
+        }
+
+        // --- CALCULATION LOGIC ---
+        function getInputValue(key) {
+            const element = document.getElementById(`I_${key}`);
+            return element ? parseFloat(element.value) || 0 : 0;
+        }
+
+        function getSliderValue(key) {
+            const element = document.getElementById(key);
+            return element ? parseFloat(element.value) || 0 : 0;
+        }
+
+        function calculateEmissions() {
+            let totalBaselineTons = 0;
+            let totalOptimizedTons = 0;
+            const optimizedEmissions = {};
+
+            // Get Slider Values (normalized to 0 to 1)
+            const evSharePct = getSliderValue('S_EVCars') / 100;         // EV Share (%)
+            const kmReductionPct = getSliderValue('S_KMReduction') / 100; // KM Reduction (%)
+            const loadFactorPct = getSliderValue('S_LoadFactor') / 100;   // Load Factor (%)
+            const officeCutPct = getSliderValue('S_OfficeCut') / 100;     // Office Efficiency Cut (%)
+
+            Object.keys(EMISSION_FACTORS).forEach(key => {
+                const config = EMISSION_FACTORS[key];
+                const inputVal = getInputValue(key);
+                const factor = config.factor;
+                
+                let baselineTons = 0;
+                let optimizedTons = 0;
+
+                // BASELINE CALCULATION
+                if (key === 'Subcontractors') {
+                    // Subcontractors input is ALREADY in tons CO2e
+                    baselineTons = inputVal; 
+                } else if (key === 'Planes') {
+                    // Planes factor is 9000 kg/hour
+                    baselineTons = (inputVal * factor) / 1000;
+                } else {
+                    // Most other factors are kg/unit, divide by 1000 to get tons
+                    baselineTons = (inputVal * factor) / 1000;
+                }
+                
+                optimizedTons = baselineTons; // Start with baseline
+
+                // OPTIMIZED CALCULATION (Applying sliders)
+                if (key === 'Cars') {
+                    /* Formula: (Distance * 0.18) * (1 - 0.7 * EV/100) * (1 - KMRed/100) / 1000 */
+                    optimizedTons = (inputVal * factor) * (1 - 0.7 * evSharePct) * (1 - kmReductionPct) / 1000;
+
+                } else if (key === 'Planes') {
+                    /* Formula: Baseline * (LoadFactor/100) */
+                    optimizedTons = baselineTons * loadFactorPct;
+
+                } else if (['Lighting', 'Cooling', 'Computing'].includes(key)) {
+                    // Apply Office Efficiency Cut (%)
+                    optimizedTons = baselineTons * (1 - officeCutPct);
+
+                } else if (key === 'Subcontractors') {
+                    // Subcontractors emissions are entered directly and assumed to have no adjustments applied
+                    optimizedTons = baselineTons;
+
+                } else if (['Trucks', 'Buses', 'Forklifts', 'Heating'].includes(key)) {
+                    // These categories have no optimization sliders specified.
+                    optimizedTons = baselineTons;
+                }
+                
+                // 3. Accumulate totals and store optimized category emissions
+                totalBaselineTons += baselineTons;
+                totalOptimizedTons += optimizedTons;
+                optimizedEmissions[key] = optimizedTons;
+            });
+
+            // 4. Update UI
+            updateUI(totalBaselineTons, totalOptimizedTons, optimizedEmissions);
+        }
+
+        function updateUI(baseline, optimized, optimizedEmissions) {
+            const baselineTotalEl = document.getElementById('baselineTotal');
+            const optimizedTotalEl = document.getElementById('optimizedTotal');
+            
+            // Format numbers to 1 decimal place with thousands separators
+            baselineTotalEl.textContent = baseline.toFixed(1).toLocaleString();
+            optimizedTotalEl.textContent = optimized.toFixed(1).toLocaleString();
+            
+            // Update Bar Chart
+            barChart.data.datasets[0].data = [baseline, optimized];
+            barChart.options.scales.y.title.text = 'Emissions (tons CO2e)'; // Update Chart Y-axis title
+            barChart.update();
+
+            // Update Pie Chart
+            const pieData = Object.keys(optimizedEmissions).map(key => optimizedEmissions[key]);
+            const labels = Object.keys(optimizedEmissions);
+            
+            pieChart.data.labels = labels;
+            pieChart.data.datasets[0].data = pieData;
+            pieChart.update();
+        }
+
+        function loadSampleData() {
+            // Load the specified initial state values into the inputs
+            Object.keys(EMISSION_FACTORS).forEach(key => {
+                const element = document.getElementById(`I_${key}`);
+                if (element) element.value = EMISSION_FACTORS[key].inputVal;
+            });
+            // Reset sliders to initial values
+            Object.keys(SLIDER_CONFIGS).forEach(key => {
+                const element = document.getElementById(key);
+                if (element) {
+                    element.value = SLIDER_CONFIGS[key].initial;
+                    document.getElementById(`${key}_val`).textContent = SLIDER_CONFIGS[key].initial + '%';
+                }
+            });
+            calculateEmissions(); // Re-calculate with loaded data
+        }
+
+        function resetApp() {
+            // Set all inputs and sliders to 0
+            Object.keys(EMISSION_FACTORS).forEach(key => {
+                const element = document.getElementById(`I_${key}`);
+                if (element) element.value = 0;
+            });
+            Object.keys(SLIDER_CONFIGS).forEach(key => {
+                const element = document.getElementById(key);
+                if (element) {
+                    element.value = 0;
+                    document.getElementById(`${key}_val`).textContent = '0%';
+                }
+            });
+            calculateEmissions(); // Recalculate with reset data
+        }
+
+        // --- INITIALIZATION ---
+
+        window.onload = function() {
+            initCharts();
+            createInputFields();
+            createSliderFields();
+            
+            // Initial calculation uses the sample data
+            loadSampleData(); 
+
+            // Attach event listeners
+            document.getElementById('calculate').addEventListener('click', calculateEmissions);
+            document.getElementById('loadSampleData').addEventListener('click', loadSampleData);
+            document.getElementById('resetApp').addEventListener('click', resetApp);
+            
+            // Re-calculate when any input or slider changes
+            document.querySelectorAll('#input-fields input, #slider-fields input').forEach(el => {
+                el.addEventListener('input', calculateEmissions);
+            });
+        };
+    </script>
+</body>
+</html>
