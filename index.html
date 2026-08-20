@@ -3,7 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Green Meter App</title>
+    <title>Green Meter App — Carbon Emissions Calculator</title>
+    <meta name="description" content="Green Meter App: an interactive tool that calculates baseline vs. optimized CO2e emissions across fleet, facilities, and subcontractor activity, with live sliders for EV adoption, load factor, and office efficiency.">
+    <!-- Open Graph / social share preview -->
+    <meta property="og:title" content="Green Meter App — Carbon Emissions Calculator">
+    <meta property="og:description" content="Model your organization's carbon footprint. Adjust EV share, distance reduction, plane load factor, and office efficiency to see optimized emissions in real time.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://green-meter.netlify.app/">
+    <meta property="og:image" content="REPLACE_WITH_SCREENSHOT_URL">
+    <!-- Twitter card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Green Meter App — Carbon Emissions Calculator">
+    <meta name="twitter:description" content="Interactive baseline vs. optimized CO2e calculator with live sliders.">
+    <meta name="twitter:image" content="REPLACE_WITH_SCREENSHOT_URL">
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Chart.js CDN for Charts -->
@@ -46,7 +58,11 @@
         <!-- Header -->
         <header class="flex justify-between items-center mb-6 p-4 rounded-lg bg-gray-800 shadow-xl">
             <h1 class="text-3xl font-extrabold text-[#10b981]">Green Meter App</h1>
-            <div class="space-x-4 flex">
+            <div class="space-x-4 flex items-center">
+                <a href="REPLACE_WITH_GITHUB_REPO_URL" target="_blank" rel="noopener noreferrer"
+                   class="py-2 px-4 border border-gray-500 text-gray-200 rounded-lg hover:bg-gray-700 transition shadow-md text-sm font-medium">
+                   View Repo / Commit History
+                </a>
                 <button id="loadSampleData" class="py-2 px-4 bg-gray-600 text-white rounded-lg hover:bg-gray-500 transition shadow-md">Load Sample Data</button>
                 <button id="resetApp" class="py-2 px-4 bg-red-600 text-white rounded-lg hover:bg-red-500 transition shadow-md">Reset</button>
                 <button id="calculate" class="py-2 px-4 bg-[#10b981] text-gray-900 font-bold rounded-lg hover:bg-[#059669] transition shadow-md">Calculate</button>
@@ -282,7 +298,10 @@
         // --- CALCULATION LOGIC ---
         function getInputValue(key) {
             const element = document.getElementById(`I_${key}`);
-            return element ? parseFloat(element.value) || 0 : 0;
+            if (!element) return 0;
+            const parsed = parseFloat(element.value);
+            if (isNaN(parsed) || parsed < 0) return 0; // guard: empty, garbage, and negative input all collapse to 0
+            return parsed;
         }
 
         function getSliderValue(key) {
@@ -360,21 +379,24 @@
             const optimizedTotalEl = document.getElementById('optimizedTotal');
             
             // Format numbers to 1 decimal place with thousands separators
-            baselineTotalEl.textContent = baseline.toFixed(1).toLocaleString();
-            optimizedTotalEl.textContent = optimized.toFixed(1).toLocaleString();
+            baselineTotalEl.textContent = baseline.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+            optimizedTotalEl.textContent = optimized.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
             
-            // Update Bar Chart
-            barChart.data.datasets[0].data = [baseline, optimized];
-            barChart.options.scales.y.title.text = 'Emissions (tons CO2e)'; // Update Chart Y-axis title
-            barChart.update();
+            // Update Bar Chart (skip if Chart.js failed to load)
+            if (barChart) {
+                barChart.data.datasets[0].data = [baseline, optimized];
+                barChart.options.scales.y.title.text = 'Emissions (tons CO2e)';
+                barChart.update();
+            }
 
-            // Update Pie Chart
-            const pieData = Object.keys(optimizedEmissions).map(key => optimizedEmissions[key]);
-            const labels = Object.keys(optimizedEmissions);
-            
-            pieChart.data.labels = labels;
-            pieChart.data.datasets[0].data = pieData;
-            pieChart.update();
+            // Update Pie Chart (skip if Chart.js failed to load)
+            if (pieChart) {
+                const pieData = Object.keys(optimizedEmissions).map(key => optimizedEmissions[key]);
+                const labels = Object.keys(optimizedEmissions);
+                pieChart.data.labels = labels;
+                pieChart.data.datasets[0].data = pieData;
+                pieChart.update();
+            }
         }
 
         function loadSampleData() {
@@ -413,18 +435,32 @@
         // --- INITIALIZATION ---
 
         window.onload = function() {
-            initCharts();
+            // KNOWN LIMITATION: charts depend on the Chart.js CDN. If that request
+            // fails (offline, ad-blocker, flaky network), we still render the
+            // rest of the app instead of dying silently on a blank page.
+            let chartsOk = true;
+            try {
+                initCharts();
+            } catch (err) {
+                chartsOk = false;
+                console.error('Chart init failed:', err);
+                const notice = document.createElement('div');
+                notice.className = 'mb-4 p-3 rounded-lg bg-red-900 text-red-200 text-sm text-center';
+                notice.textContent = 'Charts failed to load (network issue). Inputs and totals still work.';
+                document.getElementById('app').prepend(notice);
+            }
+
             createInputFields();
             createSliderFields();
-            
+
             // Initial calculation uses the sample data
-            loadSampleData(); 
+            loadSampleData();
 
             // Attach event listeners
             document.getElementById('calculate').addEventListener('click', calculateEmissions);
             document.getElementById('loadSampleData').addEventListener('click', loadSampleData);
             document.getElementById('resetApp').addEventListener('click', resetApp);
-            
+
             // Re-calculate when any input or slider changes
             document.querySelectorAll('#input-fields input, #slider-fields input').forEach(el => {
                 el.addEventListener('input', calculateEmissions);
