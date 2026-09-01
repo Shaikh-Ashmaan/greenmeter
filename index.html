@@ -1,63 +1,54 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<div style="margin-top: 8px; margin-bottom: 20px;">
-  <a href="https://internship.flyrank.ai/verify?id=FR-D1-736B6-E059F&first_name=Shaikh"
-     target="_blank" 
-     rel="noopener noreferrer"
-     aria-label="Verify Shaikh Ashmaan Haroon's FlyRank AI Internship credential"
-     style="box-sizing:border-box;margin:0;padding:0;border:0;background:none;text-decoration:none;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-style:normal;line-height:1.25;text-transform:none;float:none;-webkit-font-smoothing:antialiased;display:inline-flex;align-items:center;gap:9px;font-size:14px;color:rgba(255,255,255,0.8);border-bottom:1px solid rgba(84,227,153,0.25);padding-bottom:3px;flex-wrap:wrap;row-gap:2px">
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" style="display:block;flex:none;opacity:1;transform:none;max-width:none">
-      <circle cx="12" cy="12" r="10" stroke="#54E399" stroke-width="1.5" />
-      <path d="M7.9 12.3l2.8 2.8 5.4-5.8" stroke="#54E399" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-    </svg>
-    <span style="margin:0;padding:0;border:0;background:none;color:inherit;font-weight:400;font-style:normal;letter-spacing:normal;text-transform:none;text-decoration:none;white-space:normal;float:none;white-space:nowrap">FlyRank AI Internship</span>
-    <span style="margin:0;padding:0;border:0;background:none;color:inherit;font-weight:400;font-style:normal;letter-spacing:normal;text-transform:none;text-decoration:none;white-space:normal;float:none;color:rgba(255,255,255,0.55)">·</span>
-    <span style="margin:0;padding:0;border:0;background:none;color:inherit;font-weight:400;font-style:normal;letter-spacing:normal;text-transform:none;text-decoration:none;white-space:normal;float:none;font-weight:600;color:#54E399">Verified</span>
-  </a>
-</div>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Green Meter App — Carbon Emissions Calculator</title>
     <meta name="description" content="Green Meter App: an interactive tool that calculates baseline vs. optimized CO2e emissions across fleet, facilities, and subcontractor activity, with live sliders for EV adoption, load factor, and office efficiency.">
+    
     <!-- Open Graph / social share preview -->
     <meta property="og:title" content="Green Meter App — Carbon Emissions Calculator">
     <meta property="og:description" content="Model your organization's carbon footprint. Adjust EV share, distance reduction, plane load factor, and office efficiency to see optimized emissions in real time.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://green-meter.netlify.app/">
     <meta property="og:image" content="https://green-meter.netlify.app/screenshot.png">
+    
     <!-- Twitter card -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="Green Meter App — Carbon Emissions Calculator">
     <meta name="twitter:description" content="Interactive baseline vs. optimized CO2e calculator with live sliders.">
     <meta name="twitter:image" content="https://green-meter.netlify.app/screenshot.png">
+    
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    
     <!-- Chart.js CDN for Charts -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    <!-- Chart.js DataLabels Plugin CDN (NEW) -->
+    
+    <!-- Chart.js DataLabels Plugin CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
-    <!-- Inter Font -->
+    
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <script defer src="https://cloud.umami.is/script.js" data-website-id="48c15c9f-67ec-4b8f-9cb3-5378ab78003e"></script>
+
+    <!-- Inter Font and Styles -->
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #0d1217; /* Dark background */
+            background-color: #0d1217;
         }
-        /* Custom scrollbar styling for the dark theme */
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: #1f2937; }
         ::-webkit-scrollbar-thumb { background: #10b981; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #059669; }
         
-        /* Ensure canvas is responsive */
         .chart-container {
             position: relative;
             height: 100%;
             min-height: 250px;
         }
         
-        /* Input and Text Colors */
         .input-text { color: #d1d5db; }
         .input-label { color: #6b7280; }
         .input-field {
@@ -66,10 +57,25 @@
             border: 1px solid #374151;
         }
     </style>
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-    <script defer src="https://cloud.umami.is/script.js" data-website-id="48c15c9f-67ec-4b8f-9cb3-5378ab78003e"></script>
 </head>
 <body class="min-h-screen p-0 m-0">
+
+    <!-- Top Verification Link -->
+    <div style="margin-top: 8px; margin-bottom: 20px; text-align: center;">
+      <a href="https://internship.flyrank.ai/verify?id=FR-D1-736B6-E059F&first_name=Shaikh"
+         target="_blank" 
+         rel="noopener noreferrer"
+         aria-label="Verify Shaikh Ashmaan Haroon's FlyRank AI Internship credential"
+         style="box-sizing:border-box;margin:0;padding:0;border:0;background:none;text-decoration:none;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-style:normal;line-height:1.25;text-transform:none;float:none;-webkit-font-smoothing:antialiased;display:inline-flex;align-items:center;gap:9px;font-size:14px;color:rgba(255,255,255,0.8);border-bottom:1px solid rgba(84,227,153,0.25);padding-bottom:3px;flex-wrap:wrap;row-gap:2px">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" style="display:block;flex:none;opacity:1;transform:none;max-width:none">
+          <circle cx="12" cy="12" r="10" stroke="#54E399" stroke-width="1.5" />
+          <path d="M7.9 12.3l2.8 2.8 5.4-5.8" stroke="#54E399" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+        <span style="margin:0;padding:0;border:0;background:none;color:inherit;font-weight:400;font-style:normal;letter-spacing:normal;text-transform:none;text-decoration:none;white-space:normal;float:none;white-space:nowrap">FlyRank AI Internship</span>
+        <span style="margin:0;padding:0;border:0;background:none;color:inherit;font-weight:400;font-style:normal;letter-spacing:normal;text-transform:none;text-decoration:none;white-space:normal;float:none;color:rgba(255,255,255,0.55)">·</span>
+        <span style="margin:0;padding:0;border:0;background:none;color:inherit;font-weight:400;font-style:normal;letter-spacing:normal;text-transform:none;text-decoration:none;white-space:normal;float:none;font-weight:600;color:#54E399">Verified</span>
+      </a>
+    </div>
 
     <div id="app" class="max-w-7xl mx-auto p-4 md:p-6">
         <!-- Header -->
@@ -91,16 +97,11 @@
 
             <!-- Left Panel: Inputs & Adjustments -->
             <div class="lg:col-span-1 bg-gray-800 p-6 rounded-xl shadow-xl space-y-6 overflow-y-auto max-h-[80vh]">
-                
                 <h2 class="text-xl font-semibold text-white border-b border-gray-700 pb-2">INPUTS - ACTIVITY DATA</h2>
-                <div id="input-fields" class="space-y-4">
-                    <!-- Inputs will be dynamically added here -->
-                </div>
+                <div id="input-fields" class="space-y-4"></div>
                 
                 <h2 class="text-xl font-semibold text-white border-b border-gray-700 pb-2 pt-4">ADJUSTMENTS - SLIDERS</h2>
-                <div id="slider-fields" class="space-y-6">
-                    <!-- Sliders will be dynamically added here -->
-                </div>
+                <div id="slider-fields" class="space-y-6"></div>
             </div>
 
             <!-- Center Panel: Pie Chart -->
@@ -109,7 +110,6 @@
                 <div class="chart-container flex-grow">
                     <canvas id="pieChart"></canvas>
                 </div>
-                <!-- UPDATED ASSUMPTIONS BLOCK -->
                 <div class="mt-4 p-3 bg-gray-900 rounded-lg text-sm text-gray-400">
                     <p class="font-bold text-white mb-1">Assumptions</p>
                     <p>
@@ -118,7 +118,6 @@
                         Heating 0.20 kg/kWh-th. EV cars emit 70% less than gasoline cars. Plane load factor scales aircraft emissions linearly.
                     </p>
                 </div>
-                <!-- END UPDATED ASSUMPTIONS BLOCK -->
             </div>
 
             <!-- Right Panel: Bar Chart -->
@@ -141,14 +140,12 @@
         </div>
     </div>
 
+    <!-- Application JavaScript Logic -->
     <script>
-        // --- FIREBASE SETUP (Mandatory Inclusion) ---
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
         console.log(`App ID: ${appId}. Firebase setup complete.`);
 
-        // --- CORE DATA AND FACTORS (Updated based on the new image) ---
-        // Factors are in kg/unit except for Planes (kg/hour) and Subcontractors (tons/year - enter directly)
         const EMISSION_FACTORS = {
             Cars: { factor: 0.18, unit: 'km', inputVal: 250000, label: 'Cars - distance (km/year)' },
             Trucks: { factor: 0.90, unit: 'km', inputVal: 150000, label: 'Trucks - distance (km/year)' },
@@ -159,7 +156,6 @@
             Heating: { factor: 0.20, unit: 'kWh-th', inputVal: 360000, label: 'Heating - Thermal energy used (kWh-th/year)' },
             Cooling: { factor: 0.42, unit: 'kWh', inputVal: 300000, label: 'Cooling (A/C) - Electricity used (kWh/year)' },
             Computing: { factor: 0.42, unit: 'kWh', inputVal: 96000, label: 'Computing (IT) - Electricity used (kWh/year)' },
-            // Subcontractors input is already in tons CO2e, so factor is implicitly 1 (ton/ton)
             Subcontractors: { factor: 1.0, unit: 'ton', inputVal: 45, label: 'Subcontractors - Estimated emissions (tons/year)' }, 
         };
 
@@ -170,7 +166,6 @@
             S_OfficeCut: { min: 0, max: 100, step: 1, initial: 15, label: 'Office Efficiency Cut (%)', hint: 'Applied to Lighting, Cooling, and Computing emissions.' },
         };
 
-        // Chart Instances
         let barChart;
         let pieChart;
         const CHART_COLORS = [
@@ -178,10 +173,7 @@
             '#a855f7', '#6366f1', '#14b8a6', '#f43f5e', '#10b981'
         ];
 
-        // --- CHART INITIALIZATION ---
-
         function initCharts() {
-            // Bar Chart (Baseline vs Optimized)
             const barCtx = document.getElementById('barChart').getContext('2d');
             barChart = new Chart(barCtx, {
                 type: 'bar',
@@ -213,7 +205,6 @@
                 }
             });
 
-            // Pie Chart (Optimized Share)
             const pieCtx = document.getElementById('pieChart').getContext('2d');
             pieChart = new Chart(pieCtx, {
                 type: 'doughnut',
@@ -238,35 +229,25 @@
                                 boxHeight: 6
                             }
                         },
-                        // DATALABELS CONFIGURATION ADDED HERE
                         datalabels: { 
                             color: '#fff',
                             formatter: (value, context) => {
-                                // Calculate total sum of all data points
                                 const total = context.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
-                                if (total === 0) return null; // Avoid division by zero
-                                
-                                // Calculate percentage and format to one decimal place
+                                if (total === 0) return null;
                                 const percentage = (value / total * 100).toFixed(1);
-                                
-                                // Only show label if percentage is greater than 0
                                 return percentage > 0 ? percentage + '%' : null;
                             },
                             font: {
                                 weight: 'bold',
                                 size: 14,
                             },
-                            // Position labels inside the slices
                             anchor: 'center', 
                             align: 'center',
                         }
-                        // END DATALABELS CONFIGURATION
                     }
                 }
             });
         }
-
-        // --- UI GENERATION ---
 
         function createInputFields() {
             const container = document.getElementById('input-fields');
@@ -274,7 +255,6 @@
             
             Object.keys(EMISSION_FACTORS).forEach(key => {
                 const config = EMISSION_FACTORS[key];
-                // Cleaned up factor display, removing LaTeX commands
                 const factorDisplay = key === 'Subcontractors' 
                     ? `Enter directly (tons CO2e)` 
                     : `Factor: ${config.factor} kg CO2e / ${config.unit}`;
@@ -305,19 +285,18 @@
                         <label for="${key}" class="text-sm font-medium text-white">${config.label}: <span id="${key}_val" class="text-[#10b981]">${config.initial}%</span></label>
                         <input type="range" id="${key}" min="${config.min}" max="${config.max}" step="${config.step}" value="${config.initial}"
                                class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer range-lg"
-                               oninput="document.getElementById('${key}_val').textContent = this.value + '%' ">
+                               oninput="document.getElementById('${key}_val').textContent = this.value + '%'">
                         <p class="text-xs text-gray-400 italic">${config.hint}</p>
                     </div>
                 `;
             });
         }
 
-        // --- CALCULATION LOGIC ---
         function getInputValue(key) {
             const element = document.getElementById(`I_${key}`);
             if (!element) return 0;
             const parsed = parseFloat(element.value);
-            if (isNaN(parsed) || parsed < 0) return 0; // guard: empty, garbage, and negative input all collapse to 0
+            if (isNaN(parsed) || parsed < 0) return 0;
             return parsed;
         }
 
@@ -331,11 +310,10 @@
             let totalOptimizedTons = 0;
             const optimizedEmissions = {};
 
-            // Get Slider Values (normalized to 0 to 1)
-            const evSharePct = getSliderValue('S_EVCars') / 100;         // EV Share (%)
-            const kmReductionPct = getSliderValue('S_KMReduction') / 100; // KM Reduction (%)
-            const loadFactorPct = getSliderValue('S_LoadFactor') / 100;   // Load Factor (%)
-            const officeCutPct = getSliderValue('S_OfficeCut') / 100;     // Office Efficiency Cut (%)
+            const evSharePct = getSliderValue('S_EVCars') / 100;
+            const kmReductionPct = getSliderValue('S_KMReduction') / 100;
+            const loadFactorPct = getSliderValue('S_LoadFactor') / 100;
+            const officeCutPct = getSliderValue('S_OfficeCut') / 100;
 
             Object.keys(EMISSION_FACTORS).forEach(key => {
                 const config = EMISSION_FACTORS[key];
@@ -345,49 +323,31 @@
                 let baselineTons = 0;
                 let optimizedTons = 0;
 
-                // BASELINE CALCULATION
                 if (key === 'Subcontractors') {
-                    // Subcontractors input is ALREADY in tons CO2e
                     baselineTons = inputVal; 
                 } else if (key === 'Planes') {
-                    // Planes factor is 9000 kg/hour
                     baselineTons = (inputVal * factor) / 1000;
                 } else {
-                    // Most other factors are kg/unit, divide by 1000 to get tons
                     baselineTons = (inputVal * factor) / 1000;
                 }
                 
-                optimizedTons = baselineTons; // Start with baseline
+                optimizedTons = baselineTons;
 
-                // OPTIMIZED CALCULATION (Applying sliders)
                 if (key === 'Cars') {
-                    /* Formula: (Distance * 0.18) * (1 - 0.7 * EV/100) * (1 - KMRed/100) / 1000 */
                     optimizedTons = (inputVal * factor) * (1 - 0.7 * evSharePct) * (1 - kmReductionPct) / 1000;
-
                 } else if (key === 'Planes') {
-                    /* Formula: Baseline * (LoadFactor/100) */
                     optimizedTons = baselineTons * loadFactorPct;
-
                 } else if (['Lighting', 'Cooling', 'Computing'].includes(key)) {
-                    // Apply Office Efficiency Cut (%)
                     optimizedTons = baselineTons * (1 - officeCutPct);
-
-                } else if (key === 'Subcontractors') {
-                    // Subcontractors emissions are entered directly and assumed to have no adjustments applied
-                    optimizedTons = baselineTons;
-
-                } else if (['Trucks', 'Buses', 'Forklifts', 'Heating'].includes(key)) {
-                    // These categories have no optimization sliders specified.
+                } else if (key === 'Subcontractors' || ['Trucks', 'Buses', 'Forklifts', 'Heating'].includes(key)) {
                     optimizedTons = baselineTons;
                 }
                 
-                // 3. Accumulate totals and store optimized category emissions
                 totalBaselineTons += baselineTons;
                 totalOptimizedTons += optimizedTons;
                 optimizedEmissions[key] = optimizedTons;
             });
 
-            // 4. Update UI
             updateUI(totalBaselineTons, totalOptimizedTons, optimizedEmissions);
         }
 
@@ -395,18 +355,15 @@
             const baselineTotalEl = document.getElementById('baselineTotal');
             const optimizedTotalEl = document.getElementById('optimizedTotal');
             
-            // Format numbers to 1 decimal place with thousands separators
             baselineTotalEl.textContent = baseline.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
             optimizedTotalEl.textContent = optimized.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
             
-            // Update Bar Chart (skip if Chart.js failed to load)
             if (barChart) {
                 barChart.data.datasets[0].data = [baseline, optimized];
                 barChart.options.scales.y.title.text = 'Emissions (tons CO2e)';
                 barChart.update();
             }
 
-            // Update Pie Chart (skip if Chart.js failed to load)
             if (pieChart) {
                 const pieData = Object.keys(optimizedEmissions).map(key => optimizedEmissions[key]);
                 const labels = Object.keys(optimizedEmissions);
@@ -417,12 +374,10 @@
         }
 
         function loadSampleData() {
-            // Load the specified initial state values into the inputs
             Object.keys(EMISSION_FACTORS).forEach(key => {
                 const element = document.getElementById(`I_${key}`);
                 if (element) element.value = EMISSION_FACTORS[key].inputVal;
             });
-            // Reset sliders to initial values
             Object.keys(SLIDER_CONFIGS).forEach(key => {
                 const element = document.getElementById(key);
                 if (element) {
@@ -430,11 +385,10 @@
                     document.getElementById(`${key}_val`).textContent = SLIDER_CONFIGS[key].initial + '%';
                 }
             });
-            calculateEmissions(); // Re-calculate with loaded data
+            calculateEmissions();
         }
 
         function resetApp() {
-            // Set all inputs and sliders to 0
             Object.keys(EMISSION_FACTORS).forEach(key => {
                 const element = document.getElementById(`I_${key}`);
                 if (element) element.value = 0;
@@ -446,20 +400,13 @@
                     document.getElementById(`${key}_val`).textContent = '0%';
                 }
             });
-            calculateEmissions(); // Recalculate with reset data
+            calculateEmissions();
         }
 
-        // --- INITIALIZATION ---
-
         window.onload = function() {
-            // KNOWN LIMITATION: charts depend on the Chart.js CDN. If that request
-            // fails (offline, ad-blocker, flaky network), we still render the
-            // rest of the app instead of dying silently on a blank page.
-            let chartsOk = true;
             try {
                 initCharts();
             } catch (err) {
-                chartsOk = false;
                 console.error('Chart init failed:', err);
                 const notice = document.createElement('div');
                 notice.className = 'mb-4 p-3 rounded-lg bg-red-900 text-red-200 text-sm text-center';
@@ -469,54 +416,48 @@
 
             createInputFields();
             createSliderFields();
-
-            // Initial calculation uses the sample data
             loadSampleData();
 
-            // Attach event listeners
             document.getElementById('calculate').addEventListener('click', calculateEmissions);
             document.getElementById('loadSampleData').addEventListener('click', loadSampleData);
             document.getElementById('resetApp').addEventListener('click', resetApp);
 
-            // Re-calculate when any input or slider changes
             document.querySelectorAll('#input-fields input, #slider-fields input').forEach(el => {
                 el.addEventListener('input', calculateEmissions);
             });
         };
-      <!-- Footer Seal Badge -->
-<footer style="background-color: #051F21; color: #94a3b8; padding: 40px 20px 24px 20px; text-align: center; border-top: 1px solid rgba(255,255,255,0.1); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
-  <div style="display: flex; justify-content: center; align-items: center; margin-bottom: 16px;">
-    
-    <a href="https://internship.flyrank.ai/verify?id=FR-D1-736B6-E059F&amp;first_name=Shaikh" 
-       target="_blank" 
-       rel="noopener noreferrer"
-       aria-label="Verify Shaikh Ashmaan Haroon's FlyRank AI Internship credential"
-       style="box-sizing:border-box;margin:0;padding:0;border:0;background:none;text-decoration:none;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-style:normal;line-height:1.25;text-transform:none;float:none;-webkit-font-smoothing:antialiased;display:inline-block;width:164px;height:164px">
-      <svg width="164" height="164" viewBox="0 0 164 164" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;opacity:1;transform:none;max-width:none">
-        <circle cx="82" cy="82" r="81" fill="#051F21" stroke="rgba(255,255,255,0.1)" stroke-width="1" />
-        <circle cx="82" cy="82" r="65" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1" />
-        <path id="fr-fr-d1-736b6-e059f-s-top" d="M12.4 82A69.6 69.6 0 0 1 151.6 82" fill="none" />
-        <path id="fr-fr-d1-736b6-e059f-s-btm" d="M5.6 82A76.4 76.4 0 0 0 158.4 82" fill="none" />
-        <text font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="9" font-weight="700" letter-spacing="1.9" fill="rgba(255,255,255,0.55)">
-          <textPath href="#fr-fr-d1-736b6-e059f-s-top" startOffset="50%" text-anchor="middle">FLYRANK AI INTERNSHIP</textPath>
-        </text>
-        <text font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="9" font-weight="700" letter-spacing="1.6" fill="#54E399">
-          <textPath href="#fr-fr-d1-736b6-e059f-s-btm" startOffset="50%" text-anchor="middle">JUNE 2026 COHORT</textPath>
-        </text>
-        <svg x="68" y="48" width="28" height="38" viewBox="26 18 44 60" fill="none" style="opacity:1;transform:none">
-          <path d="M28.2354 74.2202V67.9039C29.6419 68.4369 31.3724 68.7055 33.4311 68.7055C35.3235 68.7055 36.8153 68.2396 37.8979 67.3079C38.9805 66.3762 39.9566 64.8695 40.8218 62.792L42.6887 58.3139L29.8976 29.2879C35.0038 29.2879 39.6028 32.3307 41.5294 36.9893L47.0746 50.3985L56.0126 28.6038C57.9221 23.9452 62.5168 20.894 67.6187 20.894L50.0795 63.5936C48.4556 67.5933 46.5205 70.5102 44.2743 72.3484C42.0281 74.1867 39.1169 75.1058 35.5451 75.1058C32.6212 75.1058 30.1875 74.812 28.2354 74.2244V74.2202Z" fill="#54E399" />
-        </svg>
-        <text x="82" y="103" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="13" font-weight="600" fill="#FFFFFF">Verified</text>
-        <text x="82" y="117" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="9.5" fill="rgba(255,255,255,0.55)">General AI Fluency</text>
-      </svg>
-    </a>
-
-  </div>
-  
-  <p style="margin: 0; font-size: 12px; color: rgba(255,255,255,0.4);">
-    Shaikh Ashmaan Haroon — Green Meter App Portfolio
-  </p>
-</footer>
     </script>
+
+    <!-- Footer Seal Badge -->
+    <footer style="background-color: #051F21; color: #94a3b8; padding: 40px 20px 24px 20px; text-align: center; border-top: 1px solid rgba(255,255,255,0.1); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+      <div style="display: flex; justify-content: center; align-items: center; margin-bottom: 16px;">
+        <a href="https://internship.flyrank.ai/verify?id=FR-D1-736B6-E059F&amp;first_name=Shaikh" 
+           target="_blank" 
+           rel="noopener noreferrer"
+           aria-label="Verify Shaikh Ashmaan Haroon's FlyRank AI Internship credential"
+           style="box-sizing:border-box;margin:0;padding:0;border:0;background:none;text-decoration:none;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-style:normal;line-height:1.25;text-transform:none;float:none;-webkit-font-smoothing:antialiased;display:inline-block;width:164px;height:164px">
+          <svg width="164" height="164" viewBox="0 0 164 164" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;opacity:1;transform:none;max-width:none">
+            <circle cx="82" cy="82" r="81" fill="#051F21" stroke="rgba(255,255,255,0.1)" stroke-width="1" />
+            <circle cx="82" cy="82" r="65" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1" />
+            <path id="fr-fr-d1-736b6-e059f-s-top" d="M12.4 82A69.6 69.6 0 0 1 151.6 82" fill="none" />
+            <path id="fr-fr-d1-736b6-e059f-s-btm" d="M5.6 82A76.4 76.4 0 0 0 158.4 82" fill="none" />
+            <text font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="9" font-weight="700" letter-spacing="1.9" fill="rgba(255,255,255,0.55)">
+              <textPath href="#fr-fr-d1-736b6-e059f-s-top" startOffset="50%" text-anchor="middle">FLYRANK AI INTERNSHIP</textPath>
+            </text>
+            <text font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="9" font-weight="700" letter-spacing="1.6" fill="#54E399">
+              <textPath href="#fr-fr-d1-736b6-e059f-s-btm" startOffset="50%" text-anchor="middle">JUNE 2026 COHORT</textPath>
+            </text>
+            <svg x="68" y="48" width="28" height="38" viewBox="26 18 44 60" fill="none" style="opacity:1;transform:none">
+              <path d="M28.2354 74.2202V67.9039C29.6419 68.4369 31.3724 68.7055 33.4311 68.7055C35.3235 68.7055 36.8153 68.2396 37.8979 67.3079C38.9805 66.3762 39.9566 64.8695 40.8218 62.792L42.6887 58.3139L29.8976 29.2879C35.0038 29.2879 39.6028 32.3307 41.5294 36.9893L47.0746 50.3985L56.0126 28.6038C57.9221 23.9452 62.5168 20.894 67.6187 20.894L50.0795 63.5936C48.4556 67.5933 46.5205 70.5102 44.2743 72.3484C42.0281 74.1867 39.1169 75.1058 35.5451 75.1058C32.6212 75.1058 30.1875 74.812 28.2354 74.2244V74.2202Z" fill="#54E399" />
+            </svg>
+            <text x="82" y="103" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="13" font-weight="600" fill="#FFFFFF">Verified</text>
+            <text x="82" y="117" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="9.5" fill="rgba(255,255,255,0.55)">General AI Fluency</text>
+          </svg>
+        </a>
+      </div>
+      <p style="margin: 0; font-size: 12px; color: rgba(255,255,255,0.4);">
+        Shaikh Ashmaan Haroon — Green Meter App Portfolio
+      </p>
+    </footer>
 </body>
 </html>
